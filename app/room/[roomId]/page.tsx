@@ -1,7 +1,7 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 function formatTimeRemaining(seconds: number) {
   const minutes = Math.floor(seconds / 60);
@@ -14,6 +14,9 @@ function formatTimeRemaining(seconds: number) {
 const Page = () => {
   const params = useParams();
   const roomId = params.roomId as string;
+
+  const [input, setInput] = useState("");
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const [copyStatus, setCopyStatus] = useState("COPY");
   const [timeRemaining, setTimeRemaining] = useState<number | null>(null);
@@ -34,7 +37,9 @@ const Page = () => {
           <div className="flex flex-col">
             <span className="text-xs text-zinc-500 uppercase">Room ID</span>
             <div className="flex items-center gap-2">
-              <span className="font-bold text-green-500">{roomId}</span>
+              <span className="font-bold text-green-500 truncate">
+                {roomId}
+              </span>
               <button
                 onClick={copyLink}
                 className="text-[10px] bg-zinc-800 cursor-pointer hover:bg-zinc-700 px-2 py-0.5 rounded text-zinc-400 hover:text-zinc-200 transition-colors"
@@ -44,22 +49,62 @@ const Page = () => {
             </div>
           </div>
 
-          <div className="h-8 w-px bg-zinc-800"/>
+          <div className="h-8 w-px bg-zinc-800" />
 
           <div className="flex flex-col">
-            <span className="text-xs text-zinc-500 uppercase">Self-Destruct</span>
-            <span className={`text-sm font-bold flex items-center gap-2 ${timeRemaining !== null && timeRemaining < 60
-                ? "text-red-500"
-                : "text-amber-500"
-            }`}>{timeRemaining !== null ? formatTimeRemaining(timeRemaining) : "--:--"}</span>
+            <span className="text-xs text-zinc-500 uppercase">
+              Self-Destruct
+            </span>
+            <span
+              className={`text-sm font-bold flex items-center gap-2 ${
+                timeRemaining !== null && timeRemaining < 60
+                  ? "text-red-500"
+                  : "text-amber-500"
+              }`}
+            >
+              {timeRemaining !== null
+                ? formatTimeRemaining(timeRemaining)
+                : "--:--"}
+            </span>
           </div>
         </div>
 
-        <button className="text-xs bg-zinc-800 hover:bg-red-600 px-3 py-1.5 rounded text-zinc-400 hover:text-white font-bold transition-all group flex items-center sm:gap-2 disabled:opacity-50">
-            <span className="group-hover:animate-pulse">💣</span>
-            DESTROY ROOM
+        <button className="text-xs bg-zinc-800 hover:bg-red-600 cursor-pointer px-3 py-1.5 rounded text-zinc-400 hover:text-white font-bold transition-all group flex items-center gap-2 disabled:opacity-50">
+          <span className="group-hover:animate-pulse">💣</span>
+          DESTROY ROOM
         </button>
       </header>
+
+      <div className="flex-1 overflow-y-auto p-4 space-y-4 scrollbar-thin"></div>
+
+      <div className="p-4 border-t border-zinc-800 bg-zinc-900/30">
+        <div className="flex gap-4">
+          <div className="flex-1 relative group ">
+            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-green-500 animate-pulse">
+              {">"}
+            </span>
+            <input
+              autoFocus
+              type="text"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && input.trim()) {
+                  // TODO: SEND MESSAGE
+                  inputRef.current?.focus()
+                }
+              }}
+              ref={inputRef}
+              placeholder="Type your message..."
+              className="w-full bg-black border border-zinc-800 focus:border-zinc-700 focus:outline-none transition-colors text-zinc-100 placeholder:text-zinc-700 py-3 pl-8 pr-4 text-sm"
+            />
+          </div>
+
+          <button className="text-sm bg-zinc-800 cursor-pointer px-6 rounded text-zinc-400 hover:text-zinc-200 font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+            SEND
+          </button>
+        </div>
+      </div>
     </main>
   );
 };
